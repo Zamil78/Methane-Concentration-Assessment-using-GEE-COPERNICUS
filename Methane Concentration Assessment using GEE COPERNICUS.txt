@@ -1,0 +1,38 @@
+//Insert Shapefile and name as Dhaka
+
+//Insert Satelite Image
+var collection = ee.ImageCollection('COPERNICUS/S5P/OFFL/L3_CH4')
+  .select('CH4_column_volume_mixing_ratio_dry_air')
+  .filterDate('2023-03-01', '2023-03-30')
+  .filterBounds(Dhaka);
+
+print (collection);
+
+var Dhaka_Methane= collection.mean().clip(Dhaka);
+
+var meanValue = Dhaka_Methane.reduceRegion({
+  reducer: ee.Reducer.mean(),
+  geometry: Dhaka,
+  scale: 1113.2
+});
+
+print("Mean value of methane column volume mixing ratio in Dhaka from March 1st to May 15th, 2021:", meanValue.get('CH4_column_volume_mixing_ratio_dry_air'));
+
+var band_viz = {
+  min: 1750,
+  max: 2500,
+  palette: ['black', 'blue', 'purple', 'cyan', 'green', 'yellow', 'red']
+};
+
+
+Map.addLayer(Dhaka_Methane, band_viz, 'S5P CH4');
+Map.setCenter(90.37533868098637, 23.797468366754064,7);
+
+// Export Methane image to Google Drive
+// Export.image.toDrive({
+// image: Dhaka_Methane,
+// description: 'S5P_CH4_2021-03-01_2021-05-15',
+// folder: 'GEE_Export',
+// scale: 1113.2,
+// region: Dhaka
+// });
